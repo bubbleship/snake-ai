@@ -22,3 +22,8 @@ class Game:
 			pygame.display.update()
 
 		pygame.quit()
+
+
+def run():
+	pygame.init()
+	Game().loop()
