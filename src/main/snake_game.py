@@ -136,5 +136,6 @@ def run():
 	pygame.init()
 	Game().loop()
 
+
 if __name__ == "__main__":
 	run()
