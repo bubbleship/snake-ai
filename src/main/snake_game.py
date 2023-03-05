@@ -26,6 +26,7 @@ class Game:
 
 		self.score_count = 0
 		self.score = None
+		self.input_processed = False
 		self.place_score()
 
 	def create_snake(self):
@@ -49,6 +50,7 @@ class Game:
 	def loop(self):
 		loop = True
 		while loop:
+			self.input_processed = False
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					loop = False
@@ -60,14 +62,20 @@ class Game:
 		pygame.quit()
 
 	def process_input(self, event: pygame.event.Event):
+		if self.input_processed:
+			return
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_LEFT and self.facing != Direction.RIGHT:
+				self.input_processed = True
 				self.facing = Direction.LEFT
 			elif event.key == pygame.K_RIGHT and self.facing != Direction.LEFT:
+				self.input_processed = True
 				self.facing = Direction.RIGHT
 			elif event.key == pygame.K_UP and self.facing != Direction.DOWN:
+				self.input_processed = True
 				self.facing = Direction.UP
 			elif event.key == pygame.K_DOWN and self.facing != Direction.UP:
+				self.input_processed = True
 				self.facing = Direction.DOWN
 
 	def render(self):
