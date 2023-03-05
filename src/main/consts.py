@@ -1,0 +1,13 @@
+class Consts:
+	DEFAULT_WINDOW_WIDTH = 640
+	DEFAULT_WINDOW_HEIGHT = 640
+	FPS = 20
+	TILE_SIZE = 20
+
+
+class Colors:
+	SCORE = (200, 0, 0)
+	SNAKE_OUTLINE = (63, 186, 0)
+	SNAKE_FILL = (86, 255, 0)
+	BACKGROUND = (0, 0, 0)
+	TEXT = (169, 183, 198)
