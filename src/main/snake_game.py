@@ -42,7 +42,7 @@ class Game:
 
 	def place_score(self):
 		while True:
-			self.score = Point(random.randint(0, self.grid_width), random.randint(0, self.grid_height))
+			self.score = Point(random.randint(0, self.grid_width - 1), random.randint(0, self.grid_height - 1))
 			if self.score not in self.snake:
 				break
 
