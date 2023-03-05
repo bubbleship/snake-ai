@@ -52,10 +52,23 @@ class Game:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					loop = False
+				self.process_input(event)
+
 			self.render()
 			self.clock.tick(Consts.FPS)
 
 		pygame.quit()
+
+	def process_input(self, event: pygame.event.Event):
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_LEFT:
+				self.facing = Direction.LEFT
+			elif event.key == pygame.K_RIGHT:
+				self.facing = Direction.RIGHT
+			elif event.key == pygame.K_UP:
+				self.facing = Direction.UP
+			elif event.key == pygame.K_DOWN:
+				self.facing = Direction.DOWN
 
 	def render(self):
 		self.display.fill(Colors.BACKGROUND)
