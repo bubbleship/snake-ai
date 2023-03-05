@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from consts import Consts
+from consts import Consts, Colors
 from direction import Direction
 from structs import Point
 
@@ -16,6 +16,7 @@ class Game:
 		self.grid_height = height // Consts.TILE_SIZE
 
 		self.clock = pygame.time.Clock()
+		self.font = pygame.font.SysFont("arial", 25)
 		self.display = pygame.display.set_mode(size=(width, height))
 		pygame.display.set_caption("Snake Game")
 
@@ -48,13 +49,32 @@ class Game:
 	def loop(self):
 		loop = True
 		while loop:
-			self.clock.tick(Consts.FPS)
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					loop = False
-			pygame.display.update()
+			self.render()
+			self.clock.tick(Consts.FPS)
 
 		pygame.quit()
+
+	def render(self):
+		self.display.fill(Colors.BACKGROUND)
+
+		for node in self.snake:
+			pygame.draw.rect(self.display, Colors.SNAKE_OUTLINE,
+							 pygame.Rect(node.x * Consts.TILE_SIZE, node.y * Consts.TILE_SIZE, Consts.TILE_SIZE,
+										 Consts.TILE_SIZE))
+			pygame.draw.rect(self.display, Colors.SNAKE_FILL,
+							 pygame.Rect(node.x * Consts.TILE_SIZE + 4, node.y * Consts.TILE_SIZE + 4,
+										 Consts.TILE_SIZE - 8, Consts.TILE_SIZE - 8))
+
+		pygame.draw.rect(self.display, Colors.SCORE,
+						 pygame.Rect(self.score.x * Consts.TILE_SIZE, self.score.y * Consts.TILE_SIZE, Consts.TILE_SIZE,
+									 Consts.TILE_SIZE))
+
+		text = self.font.render("Score: " + str(self.score_count), True, Colors.TEXT)
+		self.display.blit(text, [0, 0])
+		pygame.display.flip()
 
 
 def run():
