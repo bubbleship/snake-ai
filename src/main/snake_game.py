@@ -27,6 +27,7 @@ class Game:
 		self.score_count = 0
 		self.score = None
 		self.input_processed = False
+		self.keep_game_loop = True
 		self.place_score()
 
 	def create_snake(self):
@@ -48,20 +49,21 @@ class Game:
 				break
 
 	def loop(self):
-		loop = True
-		while loop:
+		while self.keep_game_loop:
 			self.input_processed = False
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					loop = False
+					self.keep_game_loop = False
 				self.process_input(event)
 
 			self.advance_snake()
+			self.collision_check()
 
 			self.render()
 			self.clock.tick(Consts.FPS)
 
 		pygame.quit()
+		print("Final Score: " + str(self.score_count))
 
 	def process_input(self, event: pygame.event.Event):
 		if self.input_processed:
@@ -101,6 +103,14 @@ class Game:
 			self.place_score()
 		else:
 			self.snake.pop()
+
+	def collision_check(self):
+		# Checking collision at game edges:
+		if self.front.x > self.grid_width or self.front.x < 0 or self.front.y > self.grid_height or self.front.y < 0:
+			self.keep_game_loop = False
+		# Checking if the snake collided with itself:
+		if self.front in self.snake[1:]:
+			self.keep_game_loop = False
 
 	def render(self):
 		self.display.fill(Colors.BACKGROUND)
