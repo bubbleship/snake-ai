@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from consts import Consts
@@ -21,6 +23,10 @@ class Game:
 		self.facing = Direction.get_random_direction()
 		self.front, self.snake = self.create_snake()
 
+		self.score_count = 0
+		self.score = None
+		self.place_score()
+
 	def create_snake(self):
 		front = Point(self.grid_width // 2, self.grid_height // 2)
 		if self.facing == Direction.UP:
@@ -32,6 +38,12 @@ class Game:
 		else:
 			snake = [front, Point(front.x - 1, front.y), Point(front.x - 2, front.y)]
 		return front, snake
+
+	def place_score(self):
+		while True:
+			self.score = Point(random.randint(0, self.grid_width), random.randint(0, self.grid_height))
+			if self.score not in self.snake:
+				break
 
 	def loop(self):
 		loop = True
