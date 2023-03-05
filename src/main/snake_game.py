@@ -61,13 +61,13 @@ class Game:
 
 	def process_input(self, event: pygame.event.Event):
 		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_LEFT:
+			if event.key == pygame.K_LEFT and self.facing != Direction.RIGHT:
 				self.facing = Direction.LEFT
-			elif event.key == pygame.K_RIGHT:
+			elif event.key == pygame.K_RIGHT and self.facing != Direction.LEFT:
 				self.facing = Direction.RIGHT
-			elif event.key == pygame.K_UP:
+			elif event.key == pygame.K_UP and self.facing != Direction.DOWN:
 				self.facing = Direction.UP
-			elif event.key == pygame.K_DOWN:
+			elif event.key == pygame.K_DOWN and self.facing != Direction.UP:
 				self.facing = Direction.DOWN
 
 	def render(self):
