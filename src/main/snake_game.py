@@ -56,6 +56,8 @@ class Game:
 					loop = False
 				self.process_input(event)
 
+			self.advance_snake()
+
 			self.render()
 			self.clock.tick(Consts.FPS)
 
@@ -77,6 +79,28 @@ class Game:
 			elif event.key == pygame.K_DOWN and self.facing != Direction.UP:
 				self.input_processed = True
 				self.facing = Direction.DOWN
+
+	def advance_snake(self):
+		x = self.front.x
+		y = self.front.y
+
+		if self.facing == Direction.RIGHT:
+			x += 1
+		elif self.facing == Direction.LEFT:
+			x -= 1
+		elif self.facing == Direction.DOWN:
+			y += 1
+		elif self.facing == Direction.UP:
+			y -= 1
+
+		self.front = Point(x, y)
+		self.snake.insert(0, self.front)
+
+		if self.front == self.score:
+			self.score_count += 1
+			self.place_score()
+		else:
+			self.snake.pop()
 
 	def render(self):
 		self.display.fill(Colors.BACKGROUND)
