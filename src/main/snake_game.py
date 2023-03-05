@@ -106,7 +106,7 @@ class Game:
 
 	def collision_check(self):
 		# Checking collision at game edges:
-		if self.front.x > self.grid_width or self.front.x < 0 or self.front.y > self.grid_height or self.front.y < 0:
+		if self.front.x > self.grid_width - 1 or self.front.x < 0 or self.front.y > self.grid_height - 1 or self.front.y < 0:
 			self.keep_game_loop = False
 		# Checking if the snake collided with itself:
 		if self.front in self.snake[1:]:
