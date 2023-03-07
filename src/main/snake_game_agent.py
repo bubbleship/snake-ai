@@ -2,6 +2,7 @@ import random
 
 import numpy
 import pygame
+from numpy import ndarray
 
 from main.consts import Consts, Colors
 from main.direction import Direction
@@ -145,7 +146,7 @@ class Game:
 		self.display.blit(text, [0, 0])
 		pygame.display.flip()
 
-	def get_state(self):
+	def get_state(self) -> ndarray:
 		front = self.front
 		point_l = Point(front.x - 1, front.y)
 		point_r = Point(front.x + 1, front.y)
