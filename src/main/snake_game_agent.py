@@ -120,7 +120,7 @@ class Game:
 		self.game_over = self.collides(self.front)
 		return -10 if self.game_over else reward
 
-	def collides(self, point: Point):
+	def collides(self, point: Point) -> bool:
 		return (
 			# Checking collision at game edges:
 				point.x > self.grid_width - 1 or point.x < 0 or point.y > self.grid_height - 1 or point.y < 0) or (
