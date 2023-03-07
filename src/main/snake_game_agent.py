@@ -1,10 +1,13 @@
 import random
 
 import pygame
+import numpy
 
 from consts import Consts, Colors
 from direction import Direction
 from structs import Point
+
+pygame.init()
 
 
 class Game:
@@ -21,7 +24,7 @@ class Game:
 		pygame.display.set_caption("Snake Game")
 
 		# Defining fields initialized in the reset() method:
-		self.keep_game_loop = None
+		self.game_over = None
 		self.input_processed = None
 		self.score = None
 		self.score_count = None
@@ -40,7 +43,7 @@ class Game:
 		self.score_count = 0
 		self.score = None
 		self.input_processed = False
-		self.keep_game_loop = True
+		self.game_over = False
 		self.frame_iteration = 0
 		self.place_score()
 
@@ -62,41 +65,31 @@ class Game:
 			if self.score not in self.snake:
 				break
 
-	def loop(self):
-		while self.keep_game_loop:
-			self.input_processed = False
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					self.keep_game_loop = False
-				self.process_input(event)
+	def loop_iteration(self, action) -> (int, bool, int):
+		self.frame_iteration += 1
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
 
-			self.advance_snake()
-			self.collision_check()
+		reward = self.advance_snake(action)
+		reward = self.collision_check(reward)
 
-			self.render()
-			self.clock.tick(Consts.FPS)
+		self.render()
+		self.clock.tick(Consts.FPS)
+		return reward, self.game_over, self.score_count
 
-		pygame.quit()
-		print("Final Score: " + str(self.score_count))
+	def advance_snake(self, action: list[3]) -> int:
+		# Expecting action to be a list representing [no turn, right turn, left turn].
+		directions = [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]  # Sorted clockwise.
+		index = directions.index(self.facing)
 
-	def process_input(self, event: pygame.event.Event):
-		if self.input_processed:
-			return
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_LEFT and self.facing != Direction.RIGHT:
-				self.input_processed = True
-				self.facing = Direction.LEFT
-			elif event.key == pygame.K_RIGHT and self.facing != Direction.LEFT:
-				self.input_processed = True
-				self.facing = Direction.RIGHT
-			elif event.key == pygame.K_UP and self.facing != Direction.DOWN:
-				self.input_processed = True
-				self.facing = Direction.UP
-			elif event.key == pygame.K_DOWN and self.facing != Direction.UP:
-				self.input_processed = True
-				self.facing = Direction.DOWN
+		if numpy.array_equal(action, [1, 0, 0]):
+			self.facing = directions[index]  # Making no turn.
+		elif numpy.array_equal(action, [0, 1, 0]):
+			self.facing = directions[(index + 1) % 4]  # Making a right turn.
+		else:  # [0, 0, 1]
+			self.facing = directions[(index - 1) % 4]  # Making a left turn
 
-	def advance_snake(self):
 		x = self.front.x
 		y = self.front.y
 
@@ -112,19 +105,26 @@ class Game:
 		self.front = Point(x, y)
 		self.snake.insert(0, self.front)
 
+		reward = 0
 		if self.front == self.score:
 			self.score_count += 1
 			self.place_score()
+			reward = 10
 		else:
 			self.snake.pop()
 
-	def collision_check(self):
-		# Checking collision at game edges:
-		if self.front.x > self.grid_width - 1 or self.front.x < 0 or self.front.y > self.grid_height - 1 or self.front.y < 0:
-			self.keep_game_loop = False
-		# Checking if the snake collided with itself:
-		if self.front in self.snake[1:]:
-			self.keep_game_loop = False
+		return reward
+
+	def collision_check(self, reward: int):
+		self.game_over = self.collides(self.front)
+		return -10 if self.game_over else reward
+
+	def collides(self, point: Point):
+		return (
+			# Checking collision at game edges:
+				point.x > self.grid_width - 1 or point.x < 0 or point.y > self.grid_height - 1 or point.y < 0) or (
+			# Checking if the snake collided with itself:
+				point in self.snake[1:])
 
 	def render(self):
 		self.display.fill(Colors.BACKGROUND)
@@ -144,12 +144,3 @@ class Game:
 		text = self.font.render("Score: " + str(self.score_count), True, Colors.TEXT)
 		self.display.blit(text, [0, 0])
 		pygame.display.flip()
-
-
-def run():
-	pygame.init()
-	Game().loop()
-
-
-if __name__ == "__main__":
-	run()
