@@ -1,11 +1,11 @@
 import random
 
-import pygame
 import numpy
+import pygame
 
-from consts import Consts, Colors
-from direction import Direction
-from structs import Point
+from main.consts import Consts, Colors
+from main.direction import Direction
+from main.structs import Point
 
 pygame.init()
 
