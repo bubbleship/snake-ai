@@ -144,3 +144,49 @@ class Game:
 		text = self.font.render("Score: " + str(self.score_count), True, Colors.TEXT)
 		self.display.blit(text, [0, 0])
 		pygame.display.flip()
+
+	def get_state(self):
+		front = self.front
+		point_l = Point(front.x - 1, front.y)
+		point_r = Point(front.x + 1, front.y)
+		point_u = Point(front.x, front.y - 1)
+		point_d = Point(front.x, front.y + 1)
+
+		facing_l = self.facing == Direction.LEFT
+		facing_r = self.facing == Direction.RIGHT
+		facing_u = self.facing == Direction.UP
+		facing_d = self.facing == Direction.DOWN
+
+		state = [
+			# Danger ahead (Relative to game.facing)
+			(facing_r and self.collides(point_r)) or
+			(facing_l and self.collides(point_l)) or
+			(facing_u and self.collides(point_u)) or
+			(facing_d and self.collides(point_d)),
+
+			# Danger on the right side (Relative to game.facing)
+			(facing_u and self.collides(point_r)) or
+			(facing_d and self.collides(point_l)) or
+			(facing_l and self.collides(point_u)) or
+			(facing_r and self.collides(point_d)),
+
+			# Danger on the left side (Relative to game.facing)
+			(facing_d and self.collides(point_r)) or
+			(facing_u and self.collides(point_l)) or
+			(facing_r and self.collides(point_u)) or
+			(facing_l and self.collides(point_d)),
+
+			# Direction of movement
+			facing_l,
+			facing_r,
+			facing_u,
+			facing_d,
+
+			# Score location.
+			self.score.x < front.x,  # Score left
+			self.score.x > front.x,  # Score right
+			self.score.y < front.y,  # Score up
+			self.score.y > front.y  # Score down
+		]
+
+		return numpy.array(state, dtype=int)
