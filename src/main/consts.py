@@ -3,6 +3,7 @@ class Consts:
 	DEFAULT_WINDOW_HEIGHT = 640
 	FPS = 20
 	TILE_SIZE = 20
+	MAX_MEMORY = 100_000
 
 
 class Colors:
