@@ -4,6 +4,7 @@ class Consts:
 	FPS = 20
 	TILE_SIZE = 20
 	MAX_MEMORY = 100_000
+	BATCH_SIZE = 1000
 
 
 class Colors:
