@@ -20,6 +20,19 @@ class Game:
 		self.display = pygame.display.set_mode(size=(width, height))
 		pygame.display.set_caption("Snake Game")
 
+		# Defining fields initialized in the reset() method:
+		self.keep_game_loop = None
+		self.input_processed = None
+		self.score = None
+		self.score_count = None
+		self.snake = None
+		self.front = None
+		self.facing = None
+		self.frame_iteration = None
+
+		self.reset()
+
+	def reset(self):
 		# Initializing snake:
 		self.facing = Direction.get_random_direction()
 		self.front, self.snake = self.create_snake()
@@ -28,6 +41,7 @@ class Game:
 		self.score = None
 		self.input_processed = False
 		self.keep_game_loop = True
+		self.frame_iteration = 0
 		self.place_score()
 
 	def create_snake(self):
