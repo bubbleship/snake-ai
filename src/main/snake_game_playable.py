@@ -60,7 +60,7 @@ class Game:
 			self.collision_check()
 
 			self.render()
-			self.clock.tick(Consts.FPS)
+			self.clock.tick(Consts.FPS_PLAYABLE)
 
 		pygame.quit()
 		print("Final Score: " + str(self.score_count))
