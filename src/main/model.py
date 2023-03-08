@@ -3,7 +3,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as functional
-from torch import Tensor
+from torch import Tensor, optim
 
 
 class LinearQNet(nn.Module):
@@ -25,3 +25,12 @@ class LinearQNet(nn.Module):
 
 		path = os.path.join(model_directory_path, file_name)
 		torch.save(self.state_dict(), path)
+
+
+class QTrainer:
+
+	def __init__(self, model: LinearQNet, lr: float, gamma: float):
+		self.model = model
+		self.gamma = gamma
+		self.optimizer = optim.Adam(model.parameters(), lr)
+		self.criterion = nn.MSELoss()
