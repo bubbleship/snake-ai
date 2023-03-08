@@ -76,7 +76,7 @@ class Game:
 		reward = self.collision_check(reward)
 
 		self.render()
-		self.clock.tick(Consts.FPS)
+		self.clock.tick(Consts.FPS_AGENT)
 		return reward, self.game_over, self.score_count
 
 	def advance_snake(self, action: list[3]) -> int:
