@@ -30,3 +30,6 @@ class Agent:
 
 		previous_states, actions, rewards, next_states, is_game_overs = zip(*sample)
 		self.trainer.train_step(previous_states, actions, rewards, next_states, is_game_overs)
+
+	def train_short_term_memory(self, previous_state, action, reward, next_state, is_game_over):
+		self.trainer.train_step(previous_state, action, reward, next_state, is_game_over)
