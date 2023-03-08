@@ -1,3 +1,6 @@
+import os
+
+import torch
 import torch.nn as nn
 import torch.nn.functional as functional
 from torch import Tensor
@@ -14,3 +17,11 @@ class LinearQNet(nn.Module):
 		x = functional.relu(self.input_to_hidden(x))
 		x = self.hidden_to_output(x)
 		return x
+
+	def save(self, file_name: str = "model.pth"):
+		model_directory_path = "./model"
+		if not os.path.exists(model_directory_path):
+			os.makedirs(model_directory_path)
+
+		path = os.path.join(model_directory_path, file_name)
+		torch.save(self.state_dict(), path)
