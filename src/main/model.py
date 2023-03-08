@@ -5,7 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as functional
 from numpy import ndarray
 from torch import Tensor, optim
-from torch.nn import Linear
+from torch.nn import Linear, MSELoss
+from torch.optim import Adam
 
 
 class LinearQNet(nn.Module):
@@ -32,6 +33,10 @@ class LinearQNet(nn.Module):
 
 
 class QTrainer:
+	model: LinearQNet
+	gamma: float
+	optimizer: Adam
+	criterion: MSELoss
 
 	def __init__(self, model: LinearQNet, lr: float, gamma: float):
 		self.model = model
