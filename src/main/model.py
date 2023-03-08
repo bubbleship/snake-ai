@@ -5,9 +5,12 @@ import torch.nn as nn
 import torch.nn.functional as functional
 from numpy import ndarray
 from torch import Tensor, optim
+from torch.nn import Linear
 
 
 class LinearQNet(nn.Module):
+	input_to_hidden: Linear
+	hidden_to_output: Linear
 
 	def __init__(self, input_layer_size: int, hidden_layer_size: int, output_layer_size):
 		super().__init__()
