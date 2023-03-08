@@ -91,3 +91,7 @@ def train():
 			score_average = total_score / agent.games_count
 			plot_mean_scores.append(score_average)
 			plot(plot_scores, plot_mean_scores)
+
+
+if __name__ == "__main__":
+	train()
