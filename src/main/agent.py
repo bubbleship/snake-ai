@@ -78,13 +78,11 @@ def train():
 
 			highest_score = max(highest_score, score)
 
-			print("Game", agent.games_count, "Score", score, "Highest", highest_score)
-
 			if score > highest_score:
 				highest_score = score
 				agent.model.save()
 
-			print('Game', agent.games_count, 'Score', score, 'Record:', highest_score)
+			print("Game", agent.games_count, "Score", score, "Highest", highest_score)
 
 			plot_scores.append(score)
 			total_score += score
