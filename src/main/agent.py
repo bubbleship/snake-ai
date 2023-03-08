@@ -4,8 +4,10 @@ from collections import deque
 import torch
 from numpy import ndarray
 
-from main.consts import Consts
-from main.model import LinearQNet, QTrainer
+from consts import Consts
+from graph_display import plot
+from model import LinearQNet, QTrainer
+from snake_game_agent import Game
 
 
 class Agent:
@@ -49,3 +51,43 @@ class Agent:
 			action[action_type] = 1
 
 		return action
+
+
+def train():
+	plot_scores = []
+	plot_mean_scores = []
+	total_score = 0
+	highest_score = 0
+	agent = Agent()
+	game = Game()
+
+	while True:
+		previous_state = game.get_state()
+		action = agent.get_action(previous_state)
+
+		reward, is_game_over, score = game.loop_iteration(action)
+		next_state = game.get_state()
+
+		agent.train_short_term_memory(previous_state, action, reward, next_state, is_game_over)
+		agent.remember(previous_state, action, reward, next_state, is_game_over)
+
+		if is_game_over:
+			game.reset()
+			agent.games_count += 1
+			agent.train_long_term_memory()
+
+			highest_score = max(highest_score, score)
+
+			print("Game", agent.games_count, "Score", score, "Highest", highest_score)
+
+			if score > highest_score:
+				highest_score = score
+				agent.model.save()
+
+			print('Game', agent.games_count, 'Score', score, 'Record:', highest_score)
+
+			plot_scores.append(score)
+			total_score += score
+			score_average = total_score / agent.games_count
+			plot_mean_scores.append(score_average)
+			plot(plot_scores, plot_mean_scores)
