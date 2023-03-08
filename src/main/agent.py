@@ -1,3 +1,4 @@
+import random
 from collections import deque
 
 from numpy import ndarray
@@ -20,3 +21,12 @@ class Agent:
 	def remember(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
 				 is_game_over: bool) -> None:
 		self.memory.append((previous_state, action, reward, next_state, is_game_over))
+
+	def train_long_term_memory(self):
+		if len(self.memory) > Consts.BATCH_SIZE:
+			sample = random.sample(self.memory, Consts.BATCH_SIZE)
+		else:
+			sample = self.memory
+
+		previous_states, actions, rewards, next_states, is_game_overs = zip(*sample)
+		self.trainer.train_step(previous_states, actions, rewards, next_states, is_game_overs)
