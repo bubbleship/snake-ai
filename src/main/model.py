@@ -51,7 +51,7 @@ class QTrainer:
 			next_state = torch.unsqueeze(next_state, 0)
 			action = torch.unsqueeze(action, 0)
 			reward = torch.unsqueeze(reward, 0)
-			is_game_over = (is_game_over, )
+			is_game_over = (is_game_over,)
 
 		prediction = self.model(previous_state)
 
