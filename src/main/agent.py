@@ -1,6 +1,7 @@
 import random
 from collections import deque
 
+import torch
 from numpy import ndarray
 
 from main.consts import Consts
@@ -33,3 +34,18 @@ class Agent:
 
 	def train_short_term_memory(self, previous_state, action, reward, next_state, is_game_over):
 		self.trainer.train_step(previous_state, action, reward, next_state, is_game_over)
+
+	def get_action(self, state: ndarray) -> list[3]:
+		self.epsilon = 80 - self.games_count
+		action = [0, 0, 0]
+
+		if random.randint(0, 200) < self.epsilon:
+			action_type = random.randint(0, len(action) - 1)
+			action[action_type] = 1
+		else:
+			state_tensor = torch.tensor(state, dtype=torch.float)
+			prediction = self.model(state_tensor)
+			action_type = torch.argmax(prediction).item()
+			action[action_type] = 1
+
+		return action
