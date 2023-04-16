@@ -8,6 +8,8 @@ from torch import Tensor, optim
 from torch.nn import Linear, MSELoss
 from torch.optim import Adam
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 class LinearQNet(nn.Module):
 	input_to_hidden: Linear
@@ -17,6 +19,7 @@ class LinearQNet(nn.Module):
 		super().__init__()
 		self.input_to_hidden = nn.Linear(input_layer_size, hidden_layer_size)
 		self.hidden_to_output = nn.Linear(hidden_layer_size, output_layer_size)
+		self.to(device)
 
 	def forward(self, x: Tensor) -> Tensor:
 		x = functional.relu(self.input_to_hidden(x))
@@ -45,11 +48,11 @@ class QTrainer:
 		self.criterion = nn.MSELoss()
 
 	def train_step(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
-				   is_game_over: bool) -> None:
-		previous_state = torch.tensor(previous_state, dtype=torch.float)
-		next_state = torch.tensor(next_state, dtype=torch.float)
-		action = torch.tensor(action, dtype=torch.long)
-		reward = torch.tensor(reward, dtype=torch.float)
+			is_game_over: bool) -> None:
+		previous_state = torch.tensor(previous_state, dtype=torch.float).to(device)
+		next_state = torch.tensor(next_state, dtype=torch.float).to(device)
+		action = torch.tensor(action, dtype=torch.long).to(device)
+		reward = torch.tensor(reward, dtype=torch.float).to(device)
 
 		if len(previous_state.shape) == 1:
 			previous_state = torch.unsqueeze(previous_state, 0)

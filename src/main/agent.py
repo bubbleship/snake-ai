@@ -6,7 +6,7 @@ from numpy import ndarray
 
 from consts import Consts
 from graph_display import plot
-from model import LinearQNet, QTrainer
+from model import LinearQNet, QTrainer, device
 from snake_game_agent import Game
 
 
@@ -18,13 +18,11 @@ class Agent:
 		self.gamma = 0.9  # Discount rate
 		self.memory = deque(maxlen=Consts.MAX_MEMORY)
 		self.model = LinearQNet(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_HIDDEN_LAYER_SIZE,
-								Consts.MODEL_OUTPUT_LAYER_SIZE)
-		device = "cuda" if torch.cuda.is_available() else "cpu"
-		self.model.to(device)
+				Consts.MODEL_OUTPUT_LAYER_SIZE)
 		self.trainer = QTrainer(self.model, Consts.LEARNING_RATE, self.gamma)
 
 	def remember(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
-				 is_game_over: bool) -> None:
+			is_game_over: bool) -> None:
 		self.memory.append((previous_state, action, reward, next_state, is_game_over))
 
 	def train_long_term_memory(self):
@@ -47,7 +45,7 @@ class Agent:
 			action_type = random.randint(0, len(action) - 1)
 			action[action_type] = 1
 		else:
-			state_tensor = torch.tensor(state, dtype=torch.float)
+			state_tensor = torch.tensor(state, dtype=torch.float).to(device)
 			prediction = self.model(state_tensor)
 			action_type = torch.argmax(prediction).item()
 			action[action_type] = 1
