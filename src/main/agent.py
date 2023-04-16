@@ -19,6 +19,8 @@ class Agent:
 		self.memory = deque(maxlen=Consts.MAX_MEMORY)
 		self.model = LinearQNet(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_HIDDEN_LAYER_SIZE,
 								Consts.MODEL_OUTPUT_LAYER_SIZE)
+		device = "cuda" if torch.cuda.is_available() else "cpu"
+		self.model.to(device)
 		self.trainer = QTrainer(self.model, Consts.LEARNING_RATE, self.gamma)
 
 	def remember(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
