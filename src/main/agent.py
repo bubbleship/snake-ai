@@ -18,11 +18,11 @@ class Agent:
 		self.gamma = 0.9  # Discount rate
 		self.memory = deque(maxlen=Consts.MAX_MEMORY)
 		self.model = LinearQNet(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_HIDDEN_LAYER_SIZE,
-				Consts.MODEL_OUTPUT_LAYER_SIZE)
+								Consts.MODEL_OUTPUT_LAYER_SIZE)
 		self.trainer = QTrainer(self.model, Consts.LEARNING_RATE, self.gamma)
 
 	def remember(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
-			is_game_over: bool) -> None:
+				 is_game_over: bool) -> None:
 		self.memory.append((previous_state, action, reward, next_state, is_game_over))
 
 	def train_long_term_memory(self):
@@ -76,11 +76,11 @@ def train():
 			agent.games_count += 1
 			agent.train_long_term_memory()
 
-			highest_score = max(highest_score, score)
-
 			if score > highest_score:
 				highest_score = score
 				agent.model.save()
+
+			highest_score = max(highest_score, score)
 
 			print("Game", agent.games_count, "Score", score, "Highest", highest_score)
 

@@ -27,7 +27,7 @@ class LinearQNet(nn.Module):
 		return x
 
 	def save(self, file_name: str = "model.pth"):
-		model_directory_path = "./model"
+		model_directory_path = "model"
 		if not os.path.exists(model_directory_path):
 			os.makedirs(model_directory_path)
 
@@ -48,7 +48,7 @@ class QTrainer:
 		self.criterion = nn.MSELoss()
 
 	def train_step(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
-			is_game_over: bool) -> None:
+				   is_game_over: bool) -> None:
 		previous_state = torch.tensor(previous_state, dtype=torch.float).to(device)
 		next_state = torch.tensor(next_state, dtype=torch.float).to(device)
 		action = torch.tensor(action, dtype=torch.long).to(device)
