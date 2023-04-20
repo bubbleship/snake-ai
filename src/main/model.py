@@ -7,6 +7,7 @@ from numpy import ndarray
 from torch import Tensor, optim
 from torch.nn import Linear, MSELoss
 from torch.optim import Adam
+from consts import Consts
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -26,12 +27,11 @@ class LinearQNet(nn.Module):
 		x = self.hidden_to_output(x)
 		return x
 
-	def save(self, file_name: str = "model.pth"):
-		model_directory_path = "model"
-		if not os.path.exists(model_directory_path):
-			os.makedirs(model_directory_path)
+	def save(self, file_name: str = Consts.MODEL_FILE_NAME):
+		if not os.path.exists(Consts.MODEL_DIR_PATH):
+			os.makedirs(Consts.MODEL_DIR_PATH)
 
-		path = os.path.join(model_directory_path, file_name)
+		path = os.path.join(Consts.MODEL_DIR_PATH, file_name)
 		torch.save(self.state_dict(), path)
 
 

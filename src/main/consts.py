@@ -10,6 +10,13 @@ class Consts:
 	MODEL_INPUT_LAYER_SIZE = 11
 	MODEL_HIDDEN_LAYER_SIZE = 256
 	MODEL_OUTPUT_LAYER_SIZE = 3
+	MODEL_DIR_PATH = "model"
+	MODEL_FILE_NAME = "model.pth"
+	DATA_FILE_NAME = "data.json"
+
+
+class AgentData:
+	GAMES_COUNT = "games_count"
 
 
 class Colors:

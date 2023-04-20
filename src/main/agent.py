@@ -1,10 +1,12 @@
+import json
+import os
 import random
 from collections import deque
 
 import torch
 from numpy import ndarray
 
-from consts import Consts
+from consts import Consts, AgentData
 from graph_display import plot
 from model import LinearQNet, QTrainer, device
 from snake_game_agent import Game
@@ -19,7 +21,17 @@ class Agent:
 		self.memory = deque(maxlen=Consts.MAX_MEMORY)
 		self.model = LinearQNet(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_HIDDEN_LAYER_SIZE,
 								Consts.MODEL_OUTPUT_LAYER_SIZE)
+		self._load_model()  # Loading model data, if exists
+		self.model.to(device)
 		self.trainer = QTrainer(self.model, Consts.LEARNING_RATE, self.gamma)
+		self._load()  # Loading agent data, if exists
+
+	def _load_model(self):
+		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.MODEL_FILE_NAME)
+		if not os.path.exists(path):
+			return
+
+		self.model.load_state_dict(torch.load(path))
 
 	def remember(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
 				 is_game_over: bool) -> None:
@@ -52,6 +64,25 @@ class Agent:
 
 		return action
 
+	def save(self) -> None:
+		# Creating a dictionary to store agent data:
+		data = {
+			AgentData.GAMES_COUNT: self.games_count
+		}
+		# Saving the dictionary into a json file:
+		with open(os.path.join(Consts.MODEL_DIR_PATH, Consts.DATA_FILE_NAME), "w") as file:
+			json.dump(data, file, indent=4)
+
+	def _load(self) -> None:
+		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.DATA_FILE_NAME)
+		if not os.path.exists(path):
+			return
+
+		with open(path, "r") as file:
+			data = json.load(file)
+
+		self.games_count = data[AgentData.GAMES_COUNT]
+
 
 def train():
 	plot_scores = []
@@ -81,6 +112,8 @@ def train():
 				agent.model.save()
 
 			highest_score = max(highest_score, score)
+
+			agent.save()  # Saving agent data
 
 			print("Game", agent.games_count, "Score", score, "Highest", highest_score)
 
