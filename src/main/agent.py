@@ -3,6 +3,7 @@ import os
 import random
 from collections import deque
 
+import numpy
 import torch
 from numpy import ndarray
 
@@ -44,6 +45,8 @@ class Agent:
 			sample = self.memory
 
 		previous_states, actions, rewards, next_states, is_game_overs = zip(*sample)
+		previous_states = numpy.stack(previous_states)
+		next_states = numpy.stack(next_states)
 		self.trainer.train_step(previous_states, actions, rewards, next_states, is_game_overs)
 
 	def train_short_term_memory(self, previous_state, action, reward, next_state, is_game_over):
