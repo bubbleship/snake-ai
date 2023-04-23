@@ -71,6 +71,7 @@ class Game:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
+				exit(0)
 
 		reward = self.advance_snake(action)
 		reward = self.collision_check(reward)
