@@ -1,131 +1,85 @@
-import json
-import os
 import random
-from collections import deque
 
 import numpy
 import torch
 from numpy import ndarray
+from torch import optim, nn, device
+from torch.nn import MSELoss
+from torch.optim import Adam
 
-from consts import Consts, AgentData
-from graph_display import plot
-from model import LinearQNet, QTrainer, device
-from snake_game_agent import Game
+from consts import Consts
+from model import DQN
 
 
 class Agent:
+	state_dim: int
+	epsilon_decay: float
+	epsilon_min: float
+	epsilon: float
+	gamma: float
+	action_dim: int
+	device: device
+	model: DQN
+	optimizer: Adam
+	criterion: MSELoss
 
-	def __init__(self):
-		self.games_count = 0
-		self.epsilon = 0
-		self.gamma = 0.9  # Discount rate
-		self.memory = deque(maxlen=Consts.MAX_MEMORY)
-		self.model = LinearQNet(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_HIDDEN_LAYER_SIZE,
-								Consts.MODEL_OUTPUT_LAYER_SIZE)
-		self._load_model()  # Loading model data, if exists
-		self.model.to(device)
-		self.trainer = QTrainer(self.model, Consts.LEARNING_RATE, self.gamma)
-		self._load()  # Loading agent data, if exists
+	def __init__(self, state_dim: int, action_dim: int, gamma: float = 0.99, epsilon: float = 1.0,
+				 epsilon_min: float = 0.01, epsilon_decay: float = 0.995):
+		self.state_dim = state_dim
+		self.action_dim = action_dim
+		self.gamma = gamma
+		self.epsilon = epsilon
+		self.epsilon_min = epsilon_min
+		self.epsilon_decay = epsilon_decay
 
-	def _load_model(self):
-		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.MODEL_FILE_NAME)
-		if not os.path.exists(path):
-			return
-
-		self.model.load_state_dict(torch.load(path))
-
-	def remember(self, previous_state: ndarray, action: list[3], reward: int, next_state: ndarray,
-				 is_game_over: bool) -> None:
-		self.memory.append((previous_state, action, reward, next_state, is_game_over))
-
-	def train_long_term_memory(self):
-		if len(self.memory) > Consts.BATCH_SIZE:
-			sample = random.sample(self.memory, Consts.BATCH_SIZE)
-		else:
-			sample = self.memory
-
-		previous_states, actions, rewards, next_states, is_game_overs = zip(*sample)
-		previous_states = numpy.stack(previous_states)
-		next_states = numpy.stack(next_states)
-		self.trainer.train_step(previous_states, actions, rewards, next_states, is_game_overs)
-
-	def train_short_term_memory(self, previous_state, action, reward, next_state, is_game_over):
-		self.trainer.train_step(previous_state, action, reward, next_state, is_game_over)
+		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+		self.model = DQN(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_HIDDEN_LAYER_SIZE,
+						 Consts.MODEL_OUTPUT_LAYER_SIZE).to(self.device)
+		self.optimizer = optim.Adam(self.model.parameters())
+		self.criterion = nn.MSELoss()
 
 	def get_action(self, state: ndarray) -> list[3]:
-		self.epsilon = 80 - self.games_count
-		action = [0, 0, 0]
+		action: list[int] = [0, 0, 0]
 
-		if random.randint(0, 200) < self.epsilon:
+		if torch.rand(1) < self.epsilon: # Exploring environment.
 			action_type = random.randint(0, len(action) - 1)
 			action[action_type] = 1
-		else:
-			state_tensor = torch.tensor(state, dtype=torch.float).to(device)
-			prediction = self.model(state_tensor)
-			action_type = torch.argmax(prediction).item()
-			action[action_type] = 1
+		else: # Making prediction.
+			with torch.no_grad():
+				state = torch.tensor(state).unsqueeze(0).float().to(self.device)
+				q_values = self.model(state)
+				action_type = q_values.argmax(1).item()
+				action[action_type] = 1
 
 		return action
 
-	def save(self) -> None:
-		# Creating a dictionary to store agent data:
-		data = {
-			AgentData.GAMES_COUNT: self.games_count
-		}
-		# Saving the dictionary into a json file:
-		with open(os.path.join(Consts.MODEL_DIR_PATH, Consts.DATA_FILE_NAME), "w") as file:
-			json.dump(data, file, indent=4)
+	def train(self, memory):
+		if len(memory) > Consts.BATCH_SIZE:
+			sample = random.sample(memory, Consts.BATCH_SIZE)
+		else:
+			sample = memory
 
-	def _load(self) -> None:
-		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.DATA_FILE_NAME)
-		if not os.path.exists(path):
-			return
+		previous_state_batch, action_batch, reward_batch, next_state_batch, is_game_over_batch = zip(*sample)
+		previous_state_batch = numpy.stack(
+			previous_state_batch)  # Creating a tensor from a list of numpy.ndarray objects is slow.
+		next_state_batch = numpy.stack(
+			next_state_batch)  # Creating a tensor from a list of numpy.ndarray objects is slow.
+		previous_state_tensor = torch.tensor(previous_state_batch, dtype=torch.float, device=self.device)
+		action_tensor = torch.tensor(action_batch, dtype=torch.long, device=self.device)
+		reward_tensor = torch.tensor(reward_batch, dtype=torch.float, device=self.device)
+		next_state_tensor = torch.tensor(next_state_batch, dtype=torch.float, device=self.device)
+		is_game_over_tensor = torch.tensor(is_game_over_batch, dtype=torch.int, device=self.device)
 
-		with open(path, "r") as file:
-			data = json.load(file)
+		q_values = self.model(previous_state_tensor)
+		q_values = torch.sum(q_values * action_tensor, dim=1)
+		next_q_values = self.model(next_state_tensor).max(1)[0]
+		expected_q_values = (reward_tensor + (self.gamma * next_q_values * (1 - is_game_over_tensor)))
 
-		self.games_count = data[AgentData.GAMES_COUNT]
+		loss = self.criterion(q_values, expected_q_values)
 
+		self.optimizer.zero_grad()
+		loss.backward()
+		self.optimizer.step()
 
-def train():
-	plot_scores = []
-	plot_mean_scores = []
-	total_score = 0
-	highest_score = 0
-	agent = Agent()
-	game = Game()
-
-	while True:
-		previous_state = game.get_state()
-		action = agent.get_action(previous_state)
-
-		reward, is_game_over, score = game.loop_iteration(action)
-		next_state = game.get_state()
-
-		agent.train_short_term_memory(previous_state, action, reward, next_state, is_game_over)
-		agent.remember(previous_state, action, reward, next_state, is_game_over)
-
-		if is_game_over:
-			game.reset()
-			agent.games_count += 1
-			agent.train_long_term_memory()
-
-			if score > highest_score:
-				highest_score = score
-				agent.model.save()
-
-			highest_score = max(highest_score, score)
-
-			agent.save()  # Saving agent data
-
-			print("Game", agent.games_count, "Score", score, "Highest", highest_score)
-
-			plot_scores.append(score)
-			total_score += score
-			score_average = total_score / agent.games_count
-			plot_mean_scores.append(score_average)
-			plot(plot_scores, plot_mean_scores)
-
-
-if __name__ == "__main__":
-	train()
+		if self.epsilon > self.epsilon_min:
+			self.epsilon *= self.epsilon_decay
