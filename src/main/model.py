@@ -16,7 +16,9 @@ class DQN(nn.Module):
 		self.layers = nn.Sequential(
 			nn.Linear(state_dim, hidden_dim),
 			nn.ReLU(),
-			nn.Linear(hidden_dim, action_dim),
+			nn.Linear(hidden_dim, hidden_dim),
+			nn.ReLU(),
+			nn.Linear(hidden_dim, action_dim)
 		)
 
 	def forward(self, x: Tensor) -> Tensor:
