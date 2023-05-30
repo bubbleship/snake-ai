@@ -3,12 +3,13 @@ import random
 import numpy
 import torch
 from numpy import ndarray
-from torch import optim, nn, device
+from torch import optim, device
 from torch.nn import MSELoss
 from torch.optim import Adam
 
-from consts import Consts
+from consts import Consts, Action
 from model import DQN
+from structs import Transition
 
 
 class Agent:
@@ -35,21 +36,19 @@ class Agent:
 		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		self.model = DQN(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_HIDDEN_LAYER_SIZE,
 						 Consts.MODEL_OUTPUT_LAYER_SIZE).to(self.device)
-		self.optimizer = optim.Adam(self.model.parameters())
-		self.criterion = nn.MSELoss()
+		self.optimizer = optim.Adam(self.model.parameters(), lr=Consts.LEARNING_RATE)
+		self.criterion = MSELoss()
 
-	def get_action(self, state: ndarray) -> list[3]:
-		action: list[int] = [0, 0, 0]
+	def get_action(self, state: ndarray) -> Action:
+		action: Action
 
 		if torch.rand(1) < self.epsilon: # Exploring environment.
-			action_type = random.randint(0, len(action) - 1)
-			action[action_type] = 1
+			action = Action(random.randint(0, len(Action) - 1))
 		else: # Making prediction.
 			with torch.no_grad():
 				state = torch.tensor(state).unsqueeze(0).float().to(self.device)
 				q_values = self.model(state)
-				action_type = q_values.argmax(1).item()
-				action[action_type] = 1
+				action = Action(q_values.argmax(1).item())
 
 		return action
 
@@ -59,23 +58,24 @@ class Agent:
 		else:
 			sample = memory
 
-		previous_state_batch, action_batch, reward_batch, next_state_batch, is_game_over_batch = zip(*sample)
-		previous_state_batch = numpy.stack(
-			previous_state_batch)  # Creating a tensor from a list of numpy.ndarray objects is slow.
-		next_state_batch = numpy.stack(
-			next_state_batch)  # Creating a tensor from a list of numpy.ndarray objects is slow.
-		previous_state_tensor = torch.tensor(previous_state_batch, dtype=torch.float, device=self.device)
-		action_tensor = torch.tensor(action_batch, dtype=torch.long, device=self.device)
-		reward_tensor = torch.tensor(reward_batch, dtype=torch.float, device=self.device)
-		next_state_tensor = torch.tensor(next_state_batch, dtype=torch.float, device=self.device)
-		is_game_over_tensor = torch.tensor(is_game_over_batch, dtype=torch.int, device=self.device)
+		#previous_state_batch, action_batch, reward_batch, next_state_batch, is_game_over_batch = zip(*sample)
+		batch = Transition(*zip(*sample))
+		previous_state = numpy.stack(
+			batch.previous_state)  # Creating a tensor from a list of numpy.ndarray objects is slow.
+		next_state = numpy.stack(
+			batch.next_state)  # Creating a tensor from a list of numpy.ndarray objects is slow.
+		previous_state_tensor = torch.tensor(previous_state, dtype=torch.float, device=self.device)
+		action_tensor = torch.tensor(batch.action, dtype=torch.long, device=self.device).unsqueeze(-1)
+		reward_tensor = torch.tensor(batch.reward, dtype=torch.float, device=self.device).unsqueeze(-1)
+		next_state_tensor = torch.tensor(next_state, dtype=torch.float, device=self.device)
+		is_game_over_tensor = torch.tensor(batch.is_game_over, dtype=torch.int, device=self.device).unsqueeze(-1)
+
+		max_q_values = self.model(next_state_tensor).max(dim=1, keepdim=True)[0]
+		targets = (reward_tensor + (self.gamma * max_q_values * (1 - is_game_over_tensor)))
 
 		q_values = self.model(previous_state_tensor)
-		q_values = torch.sum(q_values * action_tensor, dim=1)
-		next_q_values = self.model(next_state_tensor).max(1)[0]
-		expected_q_values = (reward_tensor + (self.gamma * next_q_values * (1 - is_game_over_tensor)))
-
-		loss = self.criterion(q_values, expected_q_values)
+		action_q_values = q_values.gather(dim=1, index=action_tensor)
+		loss = self.criterion(action_q_values, targets)
 
 		self.optimizer.zero_grad()
 		loss.backward()

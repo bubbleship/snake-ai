@@ -4,7 +4,7 @@ import numpy
 import pygame
 from numpy import ndarray
 
-from consts import Consts, Colors
+from consts import Consts, Colors, Action
 from direction import Direction
 from structs import Point
 
@@ -14,8 +14,6 @@ pygame.init()
 class Game:
 
 	def __init__(self, width=Consts.DEFAULT_WINDOW_WIDTH, height=Consts.DEFAULT_WINDOW_HEIGHT):
-		self.width = width
-		self.height = height
 		self.grid_width = width // Consts.TILE_SIZE
 		self.grid_height = height // Consts.TILE_SIZE
 
@@ -26,13 +24,11 @@ class Game:
 
 		# Defining fields initialized in the reset() method:
 		self.game_over = None
-		self.input_processed = None
 		self.score = None
 		self.score_count = None
 		self.snake = None
 		self.front = None
 		self.facing = None
-		self.frame_iteration = None
 
 		self.reset()
 
@@ -43,9 +39,7 @@ class Game:
 
 		self.score_count = 0
 		self.score = None
-		self.input_processed = False
 		self.game_over = False
-		self.frame_iteration = 0
 		self.place_score()
 
 	def create_snake(self):
@@ -66,8 +60,7 @@ class Game:
 			if self.score not in self.snake:
 				break
 
-	def loop_iteration(self, action) -> (int, bool, int):
-		self.frame_iteration += 1
+	def loop_iteration(self, action: Action) -> (int, bool, int):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
@@ -80,17 +73,17 @@ class Game:
 		self.clock.tick(Consts.FPS_AGENT)
 		return reward, self.game_over, self.score_count
 
-	def advance_snake(self, action: list[3]) -> int:
+	def advance_snake(self, action: Action) -> int:
 		# Expecting action to be a list representing [no turn, right turn, left turn].
 		directions = [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]  # Sorted clockwise.
 		index = directions.index(self.facing)
 
-		if numpy.array_equal(action, [1, 0, 0]):
+		if action == Action.FORWARD:
 			self.facing = directions[index]  # Making no turn.
-		elif numpy.array_equal(action, [0, 1, 0]):
-			self.facing = directions[(index + 1) % 4]  # Making a right turn.
-		else:  # [0, 0, 1]
+		elif action == Action.LEFT:
 			self.facing = directions[(index - 1) % 4]  # Making a left turn
+		else:  # Action.RIGHT
+			self.facing = directions[(index + 1) % 4]  # Making a right turn.
 
 		x = self.front.x
 		y = self.front.y

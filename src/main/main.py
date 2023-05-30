@@ -1,9 +1,10 @@
 from collections import deque
 from typing import Any
 
-from consts import Consts
 from agent import Agent
+from consts import Consts
 from snake_game_agent import Game
+from structs import Transition
 
 
 def start():
@@ -24,7 +25,7 @@ def start():
 
 		next_state = game.get_state()  # Getting the game state after the action.
 
-		memory.append((previous_state, action, reward, next_state, is_game_over))
+		memory.append(Transition(previous_state, action.value, reward, next_state, is_game_over))
 		agent.train(memory)
 
 		if is_game_over:
@@ -33,9 +34,6 @@ def start():
 
 			if score > highest_score:
 				highest_score = score
-			# agent.model.save()
-
-			highest_score = max(highest_score, score)
 
 			print("Game", games_count, "Score", score, "Highest", highest_score)
 

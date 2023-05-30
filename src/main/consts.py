@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class Consts:
 	DEFAULT_WINDOW_WIDTH = 640
 	DEFAULT_WINDOW_HEIGHT = 640
@@ -25,3 +28,9 @@ class Colors:
 	SNAKE_FILL = (86, 255, 0)
 	BACKGROUND = (0, 0, 0)
 	TEXT = (169, 183, 198)
+
+
+class Action(Enum):
+	FORWARD = 0
+	LEFT = 1
+	RIGHT = 2
