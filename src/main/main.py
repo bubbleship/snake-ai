@@ -1,23 +1,20 @@
 from collections import deque
-from typing import Any
+
+import pygame
 
 from agent import Agent
 from consts import Consts
+from graph_display import History
 from snake_game_agent import Game
 from structs import Transition
 
 
 def start():
-	scores_history: list[Any] = []
-	scores_average_history: list[float] = []
-	total_score: int = 0
-	highest_score: int = 0
-	games_count: int = 0
 	agent: Agent = Agent(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_OUTPUT_LAYER_SIZE)
 	game = Game()
 	memory = deque(maxlen=Consts.MAX_MEMORY)
 
-	while True:  # Training loop.
+	while game.is_running:  # Training loop.
 		previous_state = game.get_state()  # Getting the game state before the action.
 
 		action = agent.get_action(previous_state)  # Getting the action.
@@ -30,17 +27,11 @@ def start():
 
 		if is_game_over:
 			game.reset()
-			games_count += 1
+			History.add_record(score)
+			print("Game", History.episodes_count, "Score", score, "Highest", History.highest_score)
 
-			if score > highest_score:
-				highest_score = score
-
-			print("Game", games_count, "Score", score, "Highest", highest_score)
-
-			scores_history.append(score)
-			total_score += score
-			scores_average = total_score / games_count
-			scores_average_history.append(scores_average)
+	pygame.quit()
+	History.plot_history()
 
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ class Game:
 		self.clock = pygame.time.Clock()
 		self.font = pygame.font.SysFont("arial", 25)
 		self.display = pygame.display.set_mode(size=(width, height))
+		self.is_running = True
 		pygame.display.set_caption("Snake Game")
 
 		# Defining fields initialized in the reset() method:
@@ -63,14 +64,14 @@ class Game:
 	def loop_iteration(self, action: Action) -> (int, bool, int):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				pygame.quit()
-				exit(0)
+				self.is_running = False
 
 		reward = self.advance_snake(action)
 		reward = self.collision_check(reward)
 
 		self.render()
 		self.clock.tick(Consts.FPS_AGENT)
+
 		return reward, self.game_over, self.score_count
 
 	def advance_snake(self, action: Action) -> int:
