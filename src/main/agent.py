@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 import numpy
 import torch
@@ -25,7 +26,7 @@ class Agent:
 	criterion: MSELoss
 
 	def __init__(self, state_dim: int, action_dim: int, gamma: float = 0.99, epsilon: float = 1.0,
-				 epsilon_min: float = 0.01, epsilon_decay: float = 0.995):
+				 epsilon_min: float = 0.005, epsilon_decay: float = 0.9):
 		self.state_dim = state_dim
 		self.action_dim = action_dim
 		self.gamma = gamma
@@ -42,9 +43,9 @@ class Agent:
 	def get_action(self, state: ndarray) -> Action:
 		action: Action
 
-		if torch.rand(1) < self.epsilon: # Exploring environment.
+		if torch.rand(1) < self.epsilon:  # Exploring environment.
 			action = Action(random.randint(0, len(Action) - 1))
-		else: # Making prediction.
+		else:  # Making prediction.
 			with torch.no_grad():
 				state = torch.tensor(state).unsqueeze(0).float().to(self.device)
 				q_values = self.model(state)
@@ -52,13 +53,12 @@ class Agent:
 
 		return action
 
-	def train(self, memory):
+	def train(self, memory: deque):
 		if len(memory) > Consts.BATCH_SIZE:
 			sample = random.sample(memory, Consts.BATCH_SIZE)
 		else:
 			sample = memory
 
-		#previous_state_batch, action_batch, reward_batch, next_state_batch, is_game_over_batch = zip(*sample)
 		batch = Transition(*zip(*sample))
 		previous_state = numpy.stack(
 			batch.previous_state)  # Creating a tensor from a list of numpy.ndarray objects is slow.
@@ -75,11 +75,12 @@ class Agent:
 
 		q_values = self.model(previous_state_tensor)
 		action_q_values = q_values.gather(dim=1, index=action_tensor)
-		loss = self.criterion(action_q_values, targets)
 
 		self.optimizer.zero_grad()
+		loss = self.criterion(action_q_values, targets)
 		loss.backward()
 		self.optimizer.step()
 
+	def decay_epsilon(self):
 		if self.epsilon > self.epsilon_min:
 			self.epsilon *= self.epsilon_decay

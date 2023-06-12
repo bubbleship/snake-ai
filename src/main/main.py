@@ -12,7 +12,7 @@ from structs import Transition
 def start():
 	agent: Agent = Agent(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_OUTPUT_LAYER_SIZE)
 	game = Game()
-	memory = deque(maxlen=Consts.MAX_MEMORY)
+	memory: deque = deque(maxlen=Consts.MAX_MEMORY)
 
 	while game.is_running:  # Training loop.
 		previous_state = game.get_state()  # Getting the game state before the action.
@@ -26,6 +26,7 @@ def start():
 		agent.train(memory)
 
 		if is_game_over:
+			agent.decay_epsilon()
 			game.reset()
 			History.add_record(score)
 			print("Game", History.episodes_count, "Score", score, "Highest", History.highest_score)
