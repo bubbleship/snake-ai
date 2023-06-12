@@ -1,4 +1,9 @@
+import json
+import os
+
 import matplotlib.pyplot as pyplot
+
+from consts import HistoryDataNames as HDN, Consts
 
 pyplot.ion()
 
@@ -19,6 +24,34 @@ class History:
 		History.total_score += score
 		History.episodes_count += 1
 		History.scores_average_history.append(History.total_score / History.episodes_count)
+
+	@staticmethod
+	def save():
+		data = {
+			HDN.SCORES_HISTORY: History.scores_history,
+			HDN.SCORES_AVERAGE_HISTORY: History.scores_average_history,
+			HDN.TOTAL_SCORE: History.total_score,
+			HDN.HIGHEST_SCORE: History.highest_score,
+			HDN.EPISODES_COUNT: History.episodes_count
+		}
+
+		with open(os.path.join(Consts.MODEL_DIR_PATH, Consts.DATA_FILE_NAME), "w") as file:
+			json.dump(data, file, indent=2)
+
+	@staticmethod
+	def load():
+		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.DATA_FILE_NAME)
+		if not os.path.exists(path):
+			return
+
+		with open(path, "r") as file:
+			data = json.load(file)
+
+		History.scores_history = data[HDN.SCORES_HISTORY]
+		History.scores_average_history = data[HDN.SCORES_AVERAGE_HISTORY]
+		History.total_score = data[HDN.TOTAL_SCORE]
+		History.highest_score = data[HDN.HIGHEST_SCORE]
+		History.episodes_count = data[HDN.EPISODES_COUNT]
 
 	@staticmethod
 	def plot_history():

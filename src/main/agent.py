@@ -1,3 +1,5 @@
+import json
+import os
 import random
 from collections import deque
 
@@ -8,7 +10,7 @@ from torch import optim, device
 from torch.nn import MSELoss
 from torch.optim import Adam
 
-from consts import Consts, Action
+from consts import Consts, Action, AgentDataNames as ADN
 from model import DQN
 from structs import Transition
 
@@ -84,3 +86,25 @@ class Agent:
 	def decay_epsilon(self):
 		if self.epsilon > self.epsilon_min:
 			self.epsilon *= self.epsilon_decay
+
+	def save(self):
+		self.model.save()
+
+		data = {
+			ADN.EPSILON: self.epsilon
+		}
+
+		with open(os.path.join(Consts.MODEL_DIR_PATH, Consts.AGENT_DATA_FILE_NAME), "w") as file:
+			json.dump(data, file, indent=2)
+
+	def load(self):
+		self.model.load()
+
+		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.AGENT_DATA_FILE_NAME)
+		if not os.path.exists(path):
+			return
+
+		with open(path, "r") as file:
+			data = json.load(file)
+
+		self.epsilon = data[ADN.EPSILON]

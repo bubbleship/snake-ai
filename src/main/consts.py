@@ -16,10 +16,19 @@ class Consts:
 	MODEL_DIR_PATH = "model"
 	MODEL_FILE_NAME = "model.pth"
 	DATA_FILE_NAME = "data.json"
+	AGENT_DATA_FILE_NAME = "agent_data.json"
 
 
-class AgentData:
-	GAMES_COUNT = "games_count"
+class AgentDataNames:
+	EPSILON = "epsilon"
+
+
+class HistoryDataNames:
+	SCORES_HISTORY = "scores_history"
+	SCORES_AVERAGE_HISTORY = "scores_average_history"
+	TOTAL_SCORE = "total_score"
+	HIGHEST_SCORE = "highest_score"
+	EPISODES_COUNT = "episodes_count"
 
 
 class Colors:

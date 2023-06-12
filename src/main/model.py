@@ -24,9 +24,16 @@ class DQN(nn.Module):
 	def forward(self, x: Tensor) -> Tensor:
 		return self.layers(x)
 
-	def save(self, file_name: str = Consts.MODEL_FILE_NAME):
+	def save(self):
 		if not os.path.exists(Consts.MODEL_DIR_PATH):
 			os.makedirs(Consts.MODEL_DIR_PATH)
 
-		path = os.path.join(Consts.MODEL_DIR_PATH, file_name)
+		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.MODEL_FILE_NAME)
 		torch.save(self.state_dict(), path)
+
+	def load(self):
+		path = os.path.join(Consts.MODEL_DIR_PATH, Consts.MODEL_FILE_NAME)
+		if not os.path.exists(path):
+			return
+
+		self.load_state_dict(torch.load(path))

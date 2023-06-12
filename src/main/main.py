@@ -14,6 +14,9 @@ def start():
 	game = Game()
 	memory: deque = deque(maxlen=Consts.MAX_MEMORY)
 
+	agent.load()
+	History.load()
+
 	while game.is_running:  # Training loop.
 		previous_state = game.get_state()  # Getting the game state before the action.
 
@@ -33,6 +36,9 @@ def start():
 
 	pygame.quit()
 	History.plot_history()
+
+	agent.save()
+	History.save()
 
 
 if __name__ == "__main__":
