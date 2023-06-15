@@ -26,8 +26,8 @@ class AgentDataNames:
 class HistoryDataNames:
 	SCORES_HISTORY = "scores_history"
 	SCORES_AVERAGE_HISTORY = "scores_average_history"
+	HIGHEST_SCORE_HISTORY = "highest_score_history"
 	TOTAL_SCORE = "total_score"
-	HIGHEST_SCORE = "highest_score"
 	EPISODES_COUNT = "episodes_count"
 
 
