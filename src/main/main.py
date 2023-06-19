@@ -10,7 +10,7 @@ from structs import Transition
 
 
 def start():
-	agent: Agent = Agent(Consts.MODEL_INPUT_LAYER_SIZE, Consts.MODEL_OUTPUT_LAYER_SIZE)
+	agent: Agent = Agent()
 	game = Game()
 	memory: deque = deque(maxlen=Consts.MAX_MEMORY)
 

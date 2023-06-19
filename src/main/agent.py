@@ -16,21 +16,31 @@ from structs import Transition
 
 
 class Agent:
-	state_dim: int
-	epsilon_decay: float
-	epsilon_min: float
-	epsilon: float
 	gamma: float
-	action_dim: int
+	epsilon: float
+	epsilon_min: float
+	epsilon_decay: float
 	device: device
 	model: DQN
 	optimizer: Adam
 	criterion: MSELoss
 
-	def __init__(self, state_dim: int, action_dim: int, gamma: float = 0.99, epsilon: float = 1.0,
-				 epsilon_min: float = 0.005, epsilon_decay: float = 0.9):
-		self.state_dim = state_dim
-		self.action_dim = action_dim
+	def __init__(self, gamma: float = 0.99, epsilon: float = 1.0, epsilon_min: float = 0.005,
+				 epsilon_decay: float = 0.9):
+		"""
+		:param gamma: Determines the importance of future rewards when
+			calculating targets values
+		:type gamma: float
+		:param epsilon: The initial probability of this agent returning a
+			random action via get_action()
+		:type epsilon: float
+		:param epsilon_min: The lowest probability of this agent to ever return
+			a random action via get_action()
+		:type epsilon_min: float
+		:param epsilon_decay: The rate by which the probability of this agent
+			choosing a random action is decreasing
+		:type epsilon_decay: float
+		"""
 		self.gamma = gamma
 		self.epsilon = epsilon
 		self.epsilon_min = epsilon_min
@@ -43,6 +53,18 @@ class Agent:
 		self.criterion = MSELoss()
 
 	def get_action(self, state: ndarray) -> Action:
+		"""
+		Selects an action in an epsilon-greedy approach meaning, a random
+		action is selected at probability epsilon and an action based on the
+		given state at probability 1-epsilon
+
+		:param state: An array representing the current state of the
+			environment
+		:type state: ndarray
+		:return: a random action at a probability of epsilon or an action based
+			on the given state at a probability of 1-epsilon
+		:rtype: Action
+		"""
 		action: Action
 
 		if torch.rand(1) < self.epsilon:  # Exploring environment.
