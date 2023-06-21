@@ -70,7 +70,7 @@ class Agent:
 		if torch.rand(1) < self.epsilon:  # Exploring environment.
 			action = Action(random.randint(0, len(Action) - 1))
 		else:  # Making prediction.
-			with torch.no_grad():
+			with torch.inference_mode():
 				state = torch.tensor(state).unsqueeze(0).float().to(self.device)
 				q_values = self.model(state)
 				action = Action(q_values.argmax(1).item())
