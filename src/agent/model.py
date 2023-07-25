@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch import Tensor
 from torch.nn import Sequential
 
-from consts import Consts
+from commons.consts import Consts
 
 
 class DQN(nn.Module):

@@ -4,9 +4,9 @@ import numpy
 import pygame
 from numpy import ndarray
 
-from consts import Consts, Colors, Action
-from direction import Direction
-from structs import Point
+from commons.consts import Consts, Colors, Action
+from commons.direction import Direction
+from commons.structs import Point
 
 pygame.init()
 

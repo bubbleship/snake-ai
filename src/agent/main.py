@@ -3,10 +3,10 @@ from collections import deque
 import pygame
 
 from agent import Agent
-from consts import Consts
+from commons.consts import Consts
+from commons.structs import Transition
 from graph_display import History
 from snake_game_agent import Game
-from structs import Transition
 
 
 def start():

@@ -10,9 +10,9 @@ from torch import optim, device
 from torch.nn import MSELoss
 from torch.optim import Adam
 
-from consts import Consts, Action, AgentDataNames as ADN
+from commons.consts import Consts, Action, AgentDataNames as ADN
+from commons.structs import Transition
 from model import DQN
-from structs import Transition
 
 
 class Agent:

@@ -2,9 +2,9 @@ import random
 
 import pygame
 
-from consts import Consts, Colors
-from direction import Direction
-from structs import Point
+from commons.consts import Consts, Colors
+from commons.direction import Direction
+from commons.structs import Point
 
 
 class Game:
