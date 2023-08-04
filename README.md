@@ -31,9 +31,7 @@ around the head of the snake the agent is more likely to spiral into itself.
 
 ### Requirements
 
-Python 3.10.0 and above.
-<br>
-This project may work with earlier versions, but it is not verified.
+This project was developed with Python 3.10.0 though a different version may work just fine.
 
 **Libraries**
 
