@@ -2,11 +2,11 @@ from collections import deque
 
 import pygame
 
-from agent import Agent
+from agent.agent import Agent
+from agent.graph_display import History
+from agent.snake_game_agent import Game
 from commons.consts import Consts
 from commons.structs import Transition
-from graph_display import History
-from snake_game_agent import Game
 
 
 def start():
