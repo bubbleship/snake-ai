@@ -39,3 +39,24 @@ This project was developed with Python 3.10.0 though a different version may wor
 * Pygame: for the implementation of the environment
 * Matplotlib: for the graph summary of the agent's performance
 
+### How to Run
+
+To run this application first download the source code from the
+[releases](https://github.com/bubbleship/snake-ai/releases) section of
+this repository.
+<br>
+Next you might need to install the necessary dependencies as specified under the
+[requirements](https://github.com/bubbleship/snake-ai#Requirements) section above.
+```
+pip install -r requirements.txt
+```
+To run the agent simply execute the `SnakeAI.sh` file or the `SnakeAI.bat` file included in the
+release. It may take several minutes for the agent to show significant improvement.
+<br>
+This release also include a playable version of the game. That is what the `Snake.sh` and `Snake.bat`
+files are for.
+<br>
+At last, to remove the dependencies:
+```
+pip uninstall -y -r requirements.txt
+```
